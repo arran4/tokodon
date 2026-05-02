@@ -36,8 +36,11 @@ Kirigami.Action {
      */
     property var inputData: ({})
 
-    property Instantiator _instantiator: Instantiator {
-        Component.onCompleted: {
+    Timer {
+        id: loadTimer
+        interval: 10
+        running: true
+        onTriggered: {
             const purposeModel = Qt.createQmlObject(`import org.kde.purpose as Purpose;
 Purpose.PurposeAlternativesModel {
     pluginType: "ShareUrl"
@@ -51,6 +54,9 @@ Purpose.PurposeAlternativesModel {
             root._instantiator.model = purposeModel;
             root.visible = true;
         }
+    }
+
+    property Instantiator _instantiator: Instantiator {
 
         delegate: Kirigami.Action {
             required property int index
