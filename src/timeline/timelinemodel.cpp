@@ -197,15 +197,16 @@ QString TimelineModel::findLatestPostId(const QStringList &postIds) const
 
     // Mastodon API documentation claims that a server is responsible for sorting IDs before generating the API
     // response: https://docs.joinmastodon.org/api/guidelines/#id
-    // So, we just need to find a first post ID on m_timeline.
-    for (const auto post : std::as_const(m_timeline)) {
-        if (postIds.contains(post->originalPostId())) {
-            return post->originalPostId();
+    // But since one of the IDs might not be in the timeline yet, we can't just search the timeline.
+    // Instead, we can compare the IDs lexicographically (with length check) to find the latest one.
+    QString latest = postIds.first();
+    for (const auto &id : std::as_const(postIds)) {
+        if (id.length() > latest.length() || (id.length() == latest.length() && id > latest)) {
+            latest = id;
         }
     }
 
-    qWarning() << "None of postIds found. It shouldn't happen.";
-    return QString();
+    return latest;
 }
 
 bool TimelineModel::canFetchMore(const QModelIndex &parent) const
