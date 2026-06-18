@@ -199,14 +199,12 @@ QString TimelineModel::findLatestPostId(const QStringList &postIds) const
     // response: https://docs.joinmastodon.org/api/guidelines/#id
     // But since one of the IDs might not be in the timeline yet, we can't just search the timeline.
     // Instead, we can compare the IDs lexicographically (with length check) to find the latest one.
-    QString latest = postIds.first();
-    for (const auto &id : std::as_const(postIds)) {
-        if (id.length() > latest.length() || (id.length() == latest.length() && id > latest)) {
-            latest = id;
+    return *std::ranges::max_element(postIds, [](const QString &a, const QString &b) {
+        if (a.length() != b.length()) {
+            return a.length() < b.length();
         }
-    }
-
-    return latest;
+        return a < b;
+    });
 }
 
 bool TimelineModel::canFetchMore(const QModelIndex &parent) const
